@@ -1,3 +1,7 @@
+
+"use client";
+
+import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { PlusCircle, MinusCircle, Trash2, ShoppingCart, DollarSign } from "lucide-react";
 import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data - replace with actual data fetching and state management
 const productCategories = [
@@ -12,6 +17,7 @@ const productCategories = [
   { id: "tea", name: "Tea" },
   { id: "pastries", name: "Pastries" },
   { id: "sandwiches", name: "Sandwiches" },
+  { id: "all", name: "All Products"},
 ];
 
 const products = [
@@ -20,20 +26,101 @@ const products = [
   { id: "p3", name: "Croissant", category: "pastries", price: 2.75, stock: 30, image: "https://picsum.photos/100/100?random=3", dataAiHint: "food croissant" },
   { id: "p4", name: "Green Tea", category: "tea", price: 2.25, stock: 60, image: "https://picsum.photos/100/100?random=4", dataAiHint: "tea green" },
   { id: "p5", name: "Turkey Club", category: "sandwiches", price: 6.50, stock: 20, image: "https://picsum.photos/100/100?random=5", dataAiHint: "food sandwich" },
+  { id: "p6", name: "Cappuccino", category: "coffee", price: 3.25, stock: 35, image: "https://picsum.photos/100/100?random=6", dataAiHint: "coffee cappuccino" },
+  { id: "p7", name: "Muffin", category: "pastries", price: 2.00, stock: 45, image: "https://picsum.photos/100/100?random=7", dataAiHint: "food muffin" },
 ];
 
-// TODO: Implement actual state management for currentOrder, selectedCategory, etc.
-// For now, using placeholder values.
-const currentOrder = [
-  { productId: "p1", name: "Espresso", quantity: 2, price: 2.50, total: 5.00 },
-  { productId: "p3", name: "Croissant", quantity: 1, price: 2.75, total: 2.75 },
-];
-const selectedCategory = "coffee";
+interface OrderItem {
+  productId: string;
+  name: string;
+  quantity: number;
+  price: number;
+  total: number;
+}
+
+interface Product {
+    id: string;
+    name: string;
+    category: string;
+    price: number;
+    stock: number;
+    image: string;
+    dataAiHint?: string;
+}
 
 export default function POSPage() {
+  const [currentOrder, setCurrentOrder] = React.useState<OrderItem[]>([]);
+  const [selectedCategory, setSelectedCategory] = React.useState<string>("all");
+  const { toast } = useToast();
+
+  const addToOrder = (product: Product) => {
+    const existingItemIndex = currentOrder.findIndex(item => item.productId === product.id);
+    if (existingItemIndex > -1) {
+      const updatedOrder = [...currentOrder];
+      updatedOrder[existingItemIndex].quantity += 1;
+      updatedOrder[existingItemIndex].total = updatedOrder[existingItemIndex].quantity * updatedOrder[existingItemIndex].price;
+      setCurrentOrder(updatedOrder);
+    } else {
+      setCurrentOrder([...currentOrder, {
+        productId: product.id,
+        name: product.name,
+        quantity: 1,
+        price: product.price,
+        total: product.price,
+      }]);
+    }
+    toast({
+      title: `${product.name} added to order`,
+      description: `1 unit of ${product.name} has been added.`,
+    });
+  };
+
+  const updateQuantity = (productId: string, newQuantity: number) => {
+    if (newQuantity < 1) {
+      removeFromOrder(productId);
+      return;
+    }
+    setCurrentOrder(currentOrder.map(item =>
+      item.productId === productId ? { ...item, quantity: newQuantity, total: newQuantity * item.price } : item
+    ));
+  };
+
+  const removeFromOrder = (productId: string) => {
+    const itemToRemove = currentOrder.find(item => item.productId === productId);
+    setCurrentOrder(currentOrder.filter(item => item.productId !== productId));
+    if (itemToRemove) {
+        toast({
+            title: `${itemToRemove.name} removed`,
+            description: `${itemToRemove.name} has been removed from the order.`,
+            variant: "destructive",
+        });
+    }
+  };
+
+  const handlePayment = () => {
+    // Placeholder for payment processing logic
+    if(currentOrder.length === 0){
+        toast({
+            title: "Order Empty",
+            description: "Cannot proceed to payment with an empty order.",
+            variant: "destructive",
+        });
+        return;
+    }
+    toast({
+      title: "Payment Processing",
+      description: `Processing payment for $${total.toFixed(2)}. This is a demo.`,
+    });
+    // Potentially clear order after successful payment
+    // setCurrentOrder([]); 
+  };
+
   const subtotal = currentOrder.reduce((sum, item) => sum + item.total, 0);
-  const tax = subtotal * 0.08; // Example tax rate
+  const taxRate = 0.08; // Example 8% tax rate
+  const tax = subtotal * taxRate;
   const total = subtotal + tax;
+
+  const filteredProducts = products.filter(p => selectedCategory === "all" || p.category === selectedCategory);
 
   return (
     <div className="container mx-auto py-8 px-2 h-[calc(100vh-4rem)] flex flex-col">
@@ -43,12 +130,13 @@ export default function POSPage() {
         <Card className="lg:col-span-2 shadow-lg flex flex-col">
           <CardHeader>
             <CardTitle>Select Products</CardTitle>
-            <div className="flex space-x-2 pt-2">
+            <div className="flex space-x-2 pt-2 overflow-x-auto pb-2">
               {productCategories.map((category) => (
                 <Button
                   key={category.id}
                   variant={selectedCategory === category.id ? "default" : "outline"}
-                  // onClick={() => setSelectedCategory(category.id)} // TODO: Implement category selection
+                  onClick={() => setSelectedCategory(category.id)}
+                  className="flex-shrink-0"
                 >
                   {category.name}
                 </Button>
@@ -58,10 +146,8 @@ export default function POSPage() {
           <CardContent className="flex-1 overflow-hidden">
             <ScrollArea className="h-full pr-4">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {products
-                  .filter((p) => selectedCategory ? p.category === selectedCategory : true)
-                  .map((product) => (
-                    <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                {filteredProducts.map((product) => (
+                    <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow flex flex-col">
                       <Image 
                         src={product.image} 
                         alt={product.name} 
@@ -70,13 +156,13 @@ export default function POSPage() {
                         className="w-full h-32 object-cover"
                         data-ai-hint={product.dataAiHint} 
                       />
-                      <div className="p-3">
+                      <div className="p-3 flex flex-col flex-grow">
                         <h3 className="font-semibold text-sm truncate">{product.name}</h3>
                         <p className="text-xs text-muted-foreground">${product.price.toFixed(2)}</p>
                         <Button 
                           size="sm" 
-                          className="w-full mt-2"
-                          // onClick={() => addToOrder(product)} // TODO: Implement add to order
+                          className="w-full mt-auto" // Changed mt-2 to mt-auto
+                          onClick={() => addToOrder(product)}
                         >
                           <PlusCircle className="mr-2 h-4 w-4" /> Add
                         </Button>
@@ -84,6 +170,9 @@ export default function POSPage() {
                     </Card>
                   ))}
               </div>
+               {filteredProducts.length === 0 && (
+                <p className="text-center text-muted-foreground py-10">No products in this category.</p>
+              )}
             </ScrollArea>
           </CardContent>
         </Card>
@@ -109,20 +198,20 @@ export default function POSPage() {
                           ${item.price.toFixed(2)} x {item.quantity}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1 sm:space-x-2">
                         <Button variant="ghost" size="icon" className="h-7 w-7" 
-                          // onClick={() => updateQuantity(item.productId, item.quantity - 1)} // TODO
+                          onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                         >
                           <MinusCircle className="h-4 w-4" />
                         </Button>
                         <span className="text-sm w-4 text-center">{item.quantity}</span>
                         <Button variant="ghost" size="icon" className="h-7 w-7" 
-                          // onClick={() => updateQuantity(item.productId, item.quantity + 1)} // TODO
+                          onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                         >
                           <PlusCircle className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" 
-                          // onClick={() => removeFromOrder(item.productId)} // TODO
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive/80" 
+                          onClick={() => removeFromOrder(item.productId)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -142,7 +231,7 @@ export default function POSPage() {
                     <span>${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Tax (8%):</span>
+                    <span>Tax ({ (taxRate * 100).toFixed(0) }%):</span>
                     <span>${tax.toFixed(2)}</span>
                   </div>
                   <Separator className="my-1" />
@@ -152,7 +241,7 @@ export default function POSPage() {
                   </div>
                 </div>
                 <Button size="lg" className="w-full" 
-                  // onClick={handlePayment} // TODO
+                  onClick={handlePayment}
                 >
                   <DollarSign className="mr-2 h-5 w-5" /> Proceed to Payment
                 </Button>
