@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -31,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Image from "next/image";
-import { Card } from "@/components/ui/card"; // Added import
+import { Card } from "@/components/ui/card"; 
 
 // Mock data - replace with actual data fetching and state management
 interface InventoryItem {
@@ -40,7 +41,7 @@ interface InventoryItem {
   category: string;
   stock: number;
   price: number;
-  branch: "Branch A" | "Branch B";
+  branch: "Branch A" | "Branch B"; // This will be updated in a subsequent step if needed for consistency
   image?: string;
   dataAiHint?: string;
 }
@@ -54,7 +55,7 @@ const initialInventory: InventoryItem[] = [
 ];
 
 const categories = ["Raw Material", "Dairy", "Baked Goods", "Supplies", "Beverages"];
-const branches = ["Branch A", "Branch B"];
+const branches = ["Branch A", "Branch B"]; // This will be updated in a subsequent step if needed for consistency
 
 export default function InventoryPage() {
   const [inventory, setInventory] = React.useState<InventoryItem[]>(initialInventory);
@@ -67,7 +68,7 @@ export default function InventoryPage() {
   const [itemCategory, setItemCategory] = React.useState("");
   const [itemStock, setItemStock] = React.useState("");
   const [itemPrice, setItemPrice] = React.useState("");
-  const [itemBranch, setItemBranch] = React.useState<"Branch A" | "Branch B">("Branch A");
+  const [itemBranch, setItemBranch] = React.useState<"Branch A" | "Branch B">("Branch A"); // This will be updated in a subsequent step
 
   const filteredInventory = inventory.filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,7 +88,7 @@ export default function InventoryPage() {
       setItemCategory("");
       setItemStock("");
       setItemPrice("");
-      setItemBranch("Branch A");
+      setItemBranch("Branch A"); // Default branch
     }
     setIsDialogOpen(true);
   };

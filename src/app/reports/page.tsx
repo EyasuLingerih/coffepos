@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -17,12 +18,14 @@ interface Transaction {
   total: number;
 }
 
+type BranchName = "Branch Senagatera" | "Branch Ayat";
+
 interface DailyReport {
   date: Date;
   totalSales: number;
   transactionCount: number;
   transactions: Transaction[];
-  branch: "Branch A" | "Branch B";
+  branch: BranchName;
 }
 
 const mockReports: DailyReport[] = [
@@ -30,7 +33,7 @@ const mockReports: DailyReport[] = [
     date: new Date(2023, 10, 20), // Nov 20, 2023
     totalSales: 1250.75,
     transactionCount: 55,
-    branch: "Branch A",
+    branch: "Branch Senagatera",
     transactions: [
       { id: "T001", time: "09:15 AM", items: [{ name: "Latte", quantity: 2, price: 3.50 }, { name: "Croissant", quantity: 1, price: 2.75 }], total: 9.75 },
       { id: "T002", time: "09:30 AM", items: [{ name: "Espresso", quantity: 1, price: 2.50 }], total: 2.50 },
@@ -40,7 +43,7 @@ const mockReports: DailyReport[] = [
     date: new Date(2023, 10, 20), // Nov 20, 2023
     totalSales: 980.50,
     transactionCount: 42,
-    branch: "Branch B",
+    branch: "Branch Ayat",
     transactions: [
       { id: "T101", time: "10:05 AM", items: [{ name: "Cappuccino", quantity: 1, price: 3.25 }, { name: "Muffin", quantity: 2, price: 2.00 }], total: 7.25 },
     ],
@@ -49,17 +52,19 @@ const mockReports: DailyReport[] = [
     date: new Date(), // Today
     totalSales: 320.00,
     transactionCount: 15,
-    branch: "Branch A",
+    branch: "Branch Senagatera",
     transactions: [
       { id: "T003", time: "10:15 AM", items: [{ name: "Americano", quantity: 1, price: 3.00 }], total: 3.00 },
     ],
   }
 ];
 
+const branchOptions: BranchName[] = ["Branch Senagatera", "Branch Ayat"];
+
 
 export default function ReportsPage() {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(new Date());
-  const [selectedBranch, setSelectedBranch] = React.useState<"Branch A" | "Branch B">("Branch A");
+  const [selectedBranch, setSelectedBranch] = React.useState<BranchName>(branchOptions[0]);
   const [report, setReport] = React.useState<DailyReport | null>(null);
 
   React.useEffect(() => {
@@ -90,7 +95,7 @@ export default function ReportsPage() {
     const blob = new Blob([reportText], { type: "text/plain;charset=utf-8" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `sales_report_${format(report.date, "yyyy-MM-dd")}_${report.branch}.txt`;
+    link.download = `sales_report_${format(report.date, "yyyy-MM-dd")}_${report.branch.replace(/\s+/g, '_')}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -125,11 +130,12 @@ export default function ReportsPage() {
           </Popover>
           <select
             value={selectedBranch}
-            onChange={(e) => setSelectedBranch(e.target.value as "Branch A" | "Branch B")}
-            className="p-2 border rounded-md bg-background text-foreground focus:ring-primary focus:border-primary"
+            onChange={(e) => setSelectedBranch(e.target.value as BranchName)}
+            className="p-2 border rounded-md bg-background text-foreground focus:ring-primary focus:border-primary h-10" // Added h-10 for consistent height with button
           >
-            <option value="Branch A">Branch A</option>
-            <option value="Branch B">Branch B</option>
+            {branchOptions.map(branch => (
+              <option key={branch} value={branch}>{branch}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -205,3 +211,4 @@ export default function ReportsPage() {
     </div>
   );
 }
+
