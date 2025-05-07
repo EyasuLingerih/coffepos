@@ -34,6 +34,8 @@ import {
 import Image from "next/image";
 import { Card } from "@/components/ui/card"; 
 
+type BranchName = "Branch Senagatera" | "Branch Ayat";
+
 // Mock data - replace with actual data fetching and state management
 interface InventoryItem {
   id: string;
@@ -41,21 +43,21 @@ interface InventoryItem {
   category: string;
   stock: number;
   price: number;
-  branch: "Branch A" | "Branch B"; // This will be updated in a subsequent step if needed for consistency
+  branch: BranchName; 
   image?: string;
   dataAiHint?: string;
 }
 
 const initialInventory: InventoryItem[] = [
-  { id: "i1", name: "Espresso Beans", category: "Raw Material", stock: 100, price: 15.00, branch: "Branch A", image: "https://picsum.photos/40/40?random=10", dataAiHint: "coffee beans" },
-  { id: "i2", name: "Milk (Gallon)", category: "Dairy", stock: 50, price: 3.50, branch: "Branch A", image: "https://picsum.photos/40/40?random=11", dataAiHint: "milk carton" },
-  { id: "i3", name: "Croissants (Box)", category: "Baked Goods", stock: 30, price: 12.00, branch: "Branch B", image: "https://picsum.photos/40/40?random=12", dataAiHint: "food croissant" },
-  { id: "i4", name: "Takeaway Cups (100pcs)", category: "Supplies", stock: 200, price: 8.00, branch: "Branch A", image: "https://picsum.photos/40/40?random=13", dataAiHint: "coffee cup" },
-  { id: "i5", name: "Espresso Beans", category: "Raw Material", stock: 80, price: 15.00, branch: "Branch B", image: "https://picsum.photos/40/40?random=14", dataAiHint: "coffee beans" },
+  { id: "i1", name: "Espresso Beans", category: "Raw Material", stock: 100, price: 15.00, branch: "Branch Senagatera", image: "https://picsum.photos/40/40?random=10", dataAiHint: "coffee beans" },
+  { id: "i2", name: "Milk (Gallon)", category: "Dairy", stock: 50, price: 3.50, branch: "Branch Senagatera", image: "https://picsum.photos/40/40?random=11", dataAiHint: "milk carton" },
+  { id: "i3", name: "Croissants (Box)", category: "Baked Goods", stock: 30, price: 12.00, branch: "Branch Ayat", image: "https://picsum.photos/40/40?random=12", dataAiHint: "food croissant" },
+  { id: "i4", name: "Takeaway Cups (100pcs)", category: "Supplies", stock: 200, price: 8.00, branch: "Branch Senagatera", image: "https://picsum.photos/40/40?random=13", dataAiHint: "coffee cup" },
+  { id: "i5", name: "Espresso Beans", category: "Raw Material", stock: 80, price: 15.00, branch: "Branch Ayat", image: "https://picsum.photos/40/40?random=14", dataAiHint: "coffee beans" },
 ];
 
 const categories = ["Raw Material", "Dairy", "Baked Goods", "Supplies", "Beverages"];
-const branches = ["Branch A", "Branch B"]; // This will be updated in a subsequent step if needed for consistency
+const branches: BranchName[] = ["Branch Senagatera", "Branch Ayat"]; 
 
 export default function InventoryPage() {
   const [inventory, setInventory] = React.useState<InventoryItem[]>(initialInventory);
@@ -68,7 +70,7 @@ export default function InventoryPage() {
   const [itemCategory, setItemCategory] = React.useState("");
   const [itemStock, setItemStock] = React.useState("");
   const [itemPrice, setItemPrice] = React.useState("");
-  const [itemBranch, setItemBranch] = React.useState<"Branch A" | "Branch B">("Branch A"); // This will be updated in a subsequent step
+  const [itemBranch, setItemBranch] = React.useState<BranchName>("Branch Senagatera"); 
 
   const filteredInventory = inventory.filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -88,7 +90,7 @@ export default function InventoryPage() {
       setItemCategory("");
       setItemStock("");
       setItemPrice("");
-      setItemBranch("Branch A"); // Default branch
+      setItemBranch("Branch Senagatera"); // Default branch
     }
     setIsDialogOpen(true);
   };
@@ -222,7 +224,7 @@ export default function InventoryPage() {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="branch" className="text-right">Branch</Label>
-               <Select value={itemBranch} onValueChange={(value) => setItemBranch(value as "Branch A" | "Branch B")}>
+               <Select value={itemBranch} onValueChange={(value) => setItemBranch(value as BranchName)}>
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select branch" />
                 </SelectTrigger>
