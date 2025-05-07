@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Image from "next/image";
+import { Card } from "@/components/ui/card"; // Added import
 
 // Mock data - replace with actual data fetching and state management
 interface InventoryItem {
