@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { PlusCircle, MinusCircle, Trash2, ShoppingCart, DollarSign } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 // Mock data - replace with actual data fetching and state management
 const productCategories = [
@@ -21,13 +22,13 @@ const productCategories = [
 ];
 
 const products = [
-  { id: "p1", name: "Espresso", category: "coffee", price: 2.50, stock: 50, image: "https://picsum.photos/100/100?random=1" , dataAiHint: "coffee espresso" },
-  { id: "p2", name: "Latte", category: "coffee", price: 3.50, stock: 40, image: "https://picsum.photos/100/100?random=2", dataAiHint: "coffee latte" },
-  { id: "p3", name: "Croissant", category: "pastries", price: 2.75, stock: 30, image: "https://picsum.photos/100/100?random=3", dataAiHint: "food croissant" },
-  { id: "p4", name: "Green Tea", category: "tea", price: 2.25, stock: 60, image: "https://picsum.photos/100/100?random=4", dataAiHint: "tea green" },
-  { id: "p5", name: "Turkey Club", category: "sandwiches", price: 6.50, stock: 20, image: "https://picsum.photos/100/100?random=5", dataAiHint: "food sandwich" },
-  { id: "p6", name: "Cappuccino", category: "coffee", price: 3.25, stock: 35, image: "https://picsum.photos/100/100?random=6", dataAiHint: "coffee cappuccino" },
-  { id: "p7", name: "Muffin", category: "pastries", price: 2.00, stock: 45, image: "https://picsum.photos/100/100?random=7", dataAiHint: "food muffin" },
+  { id: "p1", name: "Espresso", category: "coffee", price: 2.50, stock: 50, image: "https://picsum.photos/100/100?random=1" , dataAiHint: "espresso shot" },
+  { id: "p2", name: "Latte", category: "coffee", price: 3.50, stock: 40, image: "https://picsum.photos/100/100?random=2", dataAiHint: "latte art" },
+  { id: "p3", name: "Croissant", category: "pastries", price: 2.75, stock: 30, image: "https://picsum.photos/100/100?random=3", dataAiHint: "croissant pastry" },
+  { id: "p4", name: "Green Tea", category: "tea", price: 2.25, stock: 60, image: "https://picsum.photos/100/100?random=4", dataAiHint: "green tea" },
+  { id: "p5", name: "Turkey Club", category: "sandwiches", price: 6.50, stock: 20, image: "https://picsum.photos/100/100?random=5", dataAiHint: "club sandwich" },
+  { id: "p6", name: "Cappuccino", category: "coffee", price: 3.25, stock: 35, image: "https://picsum.photos/100/100?random=6", dataAiHint: "cappuccino coffee" },
+  { id: "p7", name: "Muffin", category: "pastries", price: 2.00, stock: 45, image: "https://picsum.photos/100/100?random=7", dataAiHint: "blueberry muffin" },
 ];
 
 interface OrderItem {
@@ -48,7 +49,7 @@ interface Product {
     dataAiHint?: string;
 }
 
-export default function POSPage() {
+function POSPageContent() {
   const [currentOrder, setCurrentOrder] = React.useState<OrderItem[]>([]);
   const [selectedCategory, setSelectedCategory] = React.useState<string>("all");
   const { toast } = useToast();
@@ -112,7 +113,7 @@ export default function POSPage() {
       description: `Processing payment for $${total.toFixed(2)}. This is a demo.`,
     });
     // Potentially clear order after successful payment
-    // setCurrentOrder([]); 
+    // setCurrentOrder([]);
   };
 
   const subtotal = currentOrder.reduce((sum, item) => sum + item.total, 0);
@@ -148,19 +149,19 @@ export default function POSPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {filteredProducts.map((product) => (
                     <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow flex flex-col">
-                      <Image 
-                        src={product.image} 
-                        alt={product.name} 
-                        width={150} 
-                        height={150} 
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        width={150}
+                        height={150}
                         className="w-full h-32 object-cover"
-                        data-ai-hint={product.dataAiHint} 
+                        data-ai-hint={product.dataAiHint}
                       />
                       <div className="p-3 flex flex-col flex-grow">
                         <h3 className="font-semibold text-sm truncate">{product.name}</h3>
                         <p className="text-xs text-muted-foreground">${product.price.toFixed(2)}</p>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           className="w-full mt-auto" // Changed mt-2 to mt-auto
                           onClick={() => addToOrder(product)}
                         >
@@ -199,18 +200,18 @@ export default function POSPage() {
                         </p>
                       </div>
                       <div className="flex items-center space-x-1 sm:space-x-2">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" 
+                        <Button variant="ghost" size="icon" className="h-7 w-7"
                           onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                         >
                           <MinusCircle className="h-4 w-4" />
                         </Button>
                         <span className="text-sm w-4 text-center">{item.quantity}</span>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" 
+                        <Button variant="ghost" size="icon" className="h-7 w-7"
                           onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                         >
                           <PlusCircle className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive/80" 
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive/80"
                           onClick={() => removeFromOrder(item.productId)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -222,7 +223,7 @@ export default function POSPage() {
                 </ul>
               )}
             </ScrollArea>
-            
+
             {currentOrder.length > 0 && (
               <div className="mt-auto pt-4 border-t">
                 <div className="space-y-1 text-sm mb-4">
@@ -240,7 +241,7 @@ export default function POSPage() {
                     <span>${total.toFixed(2)}</span>
                   </div>
                 </div>
-                <Button size="lg" className="w-full" 
+                <Button size="lg" className="w-full"
                   onClick={handlePayment}
                 >
                   <DollarSign className="mr-2 h-5 w-5" /> Proceed to Payment
@@ -251,5 +252,15 @@ export default function POSPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+
+export default function POSPage() {
+  // Apply ProtectedRoute to the entire page content
+  return (
+     <ProtectedRoute requiredRoles={['Cashier', 'Manager']}>
+       <POSPageContent />
+     </ProtectedRoute>
   );
 }
